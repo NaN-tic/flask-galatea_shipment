@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, current_app, abort, g, \
     url_for, request, session
 from galatea.tryton import tryton
-from galatea.utils import get_tryton_locale
 from galatea.helpers import login_required
 from flask.ext.babel import gettext as _
 from flask.ext.paginate import Pagination
@@ -21,12 +20,6 @@ SHIPMENT_OUT_FIELD_NAMES = [
 SHIPMENT_OUT_RETURN_FIELD_NAMES = [
     'create_date', 'effective_date', 'planned_date', 'reference', 'code', 'state',
     ]
-
-@tryton.default_context
-def default_context():
-    context = {}
-    context['language'] = get_tryton_locale(g.language)
-    return context
 
 @shipment.route("/out/", endpoint="shipments-out")
 @login_required
