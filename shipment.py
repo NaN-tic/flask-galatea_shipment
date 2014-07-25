@@ -9,7 +9,7 @@ shipment = Blueprint('shipment', __name__, template_folder='templates')
 
 DISPLAY_MSG = _('Displaying <b>{start} - {end}</b> {record_name} in total <b>{total}</b>')
 
-limit = current_app.config.get('TRYTON_PAGINATION_SHIPMENT_LIMIT', 20)
+LIMIT = current_app.config.get('TRYTON_PAGINATION_SHIPMENT_LIMIT', 20)
 
 ShipmentOut = tryton.pool.get('stock.shipment.out')
 ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
@@ -36,16 +36,16 @@ def shipment_out_list(lang):
         ('customer', '=', session['customer']),
         ]
     total = ShipmentOut.search_count(domain)
-    offset = (page-1)*limit
+    offset = (page-1)*LIMIT
 
     order = [
         ('id', 'DESC'),
         ]
     shipments = ShipmentOut.search_read(
-        domain, offset, limit, order, SHIPMENT_OUT_FIELD_NAMES)
+        domain, offset, LIMIT, order, SHIPMENT_OUT_FIELD_NAMES)
 
     pagination = Pagination(
-        page=page, total=total, per_page=limit, display_msg=DISPLAY_MSG, bs_version='3')
+        page=page, total=total, per_page=LIMIT, display_msg=DISPLAY_MSG, bs_version='3')
 
     #breadcumbs
     breadcrumbs = [{
@@ -115,16 +115,16 @@ def shipment_out_return_list(lang):
         ('customer', '=', session['customer']),
         ]
     total = ShipmentOutReturn.search_count(domain)
-    offset = (page-1)*limit
+    offset = (page-1)*LIMIT
 
     order = [
         ('id', 'DESC'),
         ]
     shipments = ShipmentOutReturn.search_read(
-        domain, offset, limit, order, SHIPMENT_OUT_RETURN_FIELD_NAMES)
+        domain, offset, LIMIT, order, SHIPMENT_OUT_RETURN_FIELD_NAMES)
 
     pagination = Pagination(
-        page=page, total=total, per_page=limit, display_msg=DISPLAY_MSG, bs_version='3')
+        page=page, total=total, per_page=LIMIT, display_msg=DISPLAY_MSG, bs_version='3')
 
     #breadcumbs
     breadcrumbs = [{
@@ -190,9 +190,9 @@ def shipment_list(lang):
         ('customer', '=', session['customer']),
         ]
     out_shipments = ShipmentOut.search_read(
-        domain, limit=limit, fields_names=SHIPMENT_OUT_FIELD_NAMES)
+        domain, limit=LIMIT, fields_names=SHIPMENT_OUT_FIELD_NAMES)
     out_return_shipments = ShipmentOutReturn.search_read(
-        domain, limit=limit, fields_names=SHIPMENT_OUT_RETURN_FIELD_NAMES)
+        domain, limit=LIMIT, fields_names=SHIPMENT_OUT_RETURN_FIELD_NAMES)
 
     #breadcumbs
     breadcrumbs = [{
