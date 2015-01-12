@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, current_app, abort, g, \
     url_for, request, session
 from galatea.tryton import tryton
-from galatea.helpers import login_required
+from galatea.helpers import login_required, customer_required
 from flask.ext.babel import gettext as _, lazy_gettext
 from flask.ext.paginate import Pagination
 
@@ -23,6 +23,7 @@ SHIPMENT_OUT_RETURN_FIELD_NAMES = [
 
 @shipment.route("/out/", endpoint="shipments-out")
 @login_required
+@customer_required
 @tryton.transaction()
 def shipment_out_list(lang):
     '''Customer Shipments'''
@@ -67,6 +68,7 @@ def shipment_out_list(lang):
 
 @shipment.route("/out/<id>", endpoint="shipment-out")
 @login_required
+@customer_required
 @tryton.transaction()
 def shipment_out_detail(lang, id):
     '''Customer Shipment Detail'''
@@ -102,6 +104,7 @@ def shipment_out_detail(lang, id):
 
 @shipment.route("/out-return/", endpoint="shipments-out-return")
 @login_required
+@customer_required
 @tryton.transaction()
 def shipment_out_return_list(lang):
     '''Customer Return Shipments'''
@@ -146,6 +149,7 @@ def shipment_out_return_list(lang):
 
 @shipment.route("/out-return/<id>", endpoint="shipment-out-return")
 @login_required
+@customer_required
 @tryton.transaction()
 def shipment_out_return_detail(lang, id):
     '''Shipment Out Return Detail'''
@@ -181,6 +185,7 @@ def shipment_out_return_detail(lang, id):
 
 @shipment.route("/", endpoint="shipments")
 @login_required
+@customer_required
 @tryton.transaction()
 def shipment_list(lang):
     '''Shipments'''
