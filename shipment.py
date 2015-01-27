@@ -10,6 +10,7 @@ shipment = Blueprint('shipment', __name__, template_folder='templates')
 DISPLAY_MSG = lazy_gettext('Displaying <b>{start} - {end}</b> of <b>{total}</b>')
 
 LIMIT = current_app.config.get('TRYTON_PAGINATION_SHIPMENT_LIMIT', 20)
+STATE_EXCLUDE = current_app.config.get('TRYTON_SHIPMENT_OUT_STATE_EXCLUDE', [])
 
 ShipmentOut = tryton.pool.get('stock.shipment.out')
 ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
@@ -35,6 +36,7 @@ def shipment_out_list(lang):
 
     domain = [
         ('customer', '=', session['customer']),
+        ('state', 'not in', STATE_EXCLUDE),
         ]
     total = ShipmentOut.search_count(domain)
     offset = (page-1)*LIMIT
@@ -76,6 +78,7 @@ def shipment_out_detail(lang, id):
     shipments = ShipmentOut.search([
         ('id', '=', id),
         ('customer', '=', session['customer']),
+        ('state', 'not in', STATE_EXCLUDE),
         ], limit=1)
     if not shipments:
         abort(404)
@@ -116,6 +119,7 @@ def shipment_out_return_list(lang):
 
     domain = [
         ('customer', '=', session['customer']),
+        ('state', 'not in', STATE_EXCLUDE),
         ]
     total = ShipmentOutReturn.search_count(domain)
     offset = (page-1)*LIMIT
@@ -157,6 +161,7 @@ def shipment_out_return_detail(lang, id):
     shipments = ShipmentOutReturn.search([
         ('id', '=', id),
         ('customer', '=', session['customer']),
+        ('state', 'not in', STATE_EXCLUDE),
         ], limit=1)
     if not shipments:
         abort(404)
@@ -193,6 +198,7 @@ def shipment_list(lang):
     # Out / Out Return Shipments
     domain = [
         ('customer', '=', session['customer']),
+        ('state', 'not in', STATE_EXCLUDE),
         ]
     out_shipments = ShipmentOut.search_read(
         domain, limit=LIMIT, fields_names=SHIPMENT_OUT_FIELD_NAMES)
