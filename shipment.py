@@ -15,13 +15,6 @@ STATE_EXCLUDE = current_app.config.get('TRYTON_SHIPMENT_OUT_STATE_EXCLUDE', [])
 ShipmentOut = tryton.pool.get('stock.shipment.out')
 ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
 
-SHIPMENT_OUT_FIELD_NAMES = [
-    'create_date', 'effective_date', 'planned_date', 'reference', 'code', 'state',
-    ]
-SHIPMENT_OUT_RETURN_FIELD_NAMES = [
-    'create_date', 'effective_date', 'planned_date', 'reference', 'code', 'state',
-    ]
-
 @shipment.route("/out/", endpoint="shipments-out")
 @login_required
 @customer_required
@@ -44,8 +37,7 @@ def shipment_out_list(lang):
     order = [
         ('id', 'DESC'),
         ]
-    shipments = ShipmentOut.search_read(
-        domain, offset, LIMIT, order, SHIPMENT_OUT_FIELD_NAMES)
+    shipments = ShipmentOut.search(domain, offset, LIMIT, order)
 
     pagination = Pagination(
         page=page, total=total, per_page=LIMIT, display_msg=DISPLAY_MSG, bs_version='3')
@@ -127,8 +119,7 @@ def shipment_out_return_list(lang):
     order = [
         ('id', 'DESC'),
         ]
-    shipments = ShipmentOutReturn.search_read(
-        domain, offset, LIMIT, order, SHIPMENT_OUT_RETURN_FIELD_NAMES)
+    shipments = ShipmentOutReturn.search(domain, offset, LIMIT, order)
 
     pagination = Pagination(
         page=page, total=total, per_page=LIMIT, display_msg=DISPLAY_MSG, bs_version='3')
@@ -200,10 +191,8 @@ def shipment_list(lang):
         ('customer', '=', session['customer']),
         ('state', 'not in', STATE_EXCLUDE),
         ]
-    out_shipments = ShipmentOut.search_read(
-        domain, limit=LIMIT, fields_names=SHIPMENT_OUT_FIELD_NAMES)
-    out_return_shipments = ShipmentOutReturn.search_read(
-        domain, limit=LIMIT, fields_names=SHIPMENT_OUT_RETURN_FIELD_NAMES)
+    out_shipments = ShipmentOut.search(domain, limit=LIMIT)
+    out_return_shipments = ShipmentOutReturn.search(domain, limit=LIMIT)
 
     #breadcumbs
     breadcrumbs = [{
