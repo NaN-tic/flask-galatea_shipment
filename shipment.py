@@ -60,7 +60,7 @@ def shipment_out_list(lang):
             shipments=shipments,
             )
 
-@shipment.route("/out/<id>", endpoint="shipment-out")
+@shipment.route("/out/<int:id>", endpoint="shipment-out")
 @login_required
 @customer_required
 @tryton.transaction()
@@ -142,7 +142,7 @@ def shipment_out_return_list(lang):
             shipments=shipments,
             )
 
-@shipment.route("/out-return/<id>", endpoint="shipment-out-return")
+@shipment.route("/out-return/<int:id>", endpoint="shipment-out-return")
 @login_required
 @customer_required
 @tryton.transaction()
