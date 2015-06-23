@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, current_app, abort, g, \
-    url_for, request, session
+    url_for, request, session, send_file
 from galatea.tryton import tryton
+from galatea.utils import slugify
 from galatea.helpers import login_required, customer_required
 from flask.ext.babel import gettext as _, lazy_gettext
 from flask.ext.paginate import Pagination
+import tempfile
 
 shipment = Blueprint('shipment', __name__, template_folder='templates')
 
@@ -14,6 +16,36 @@ STATE_EXCLUDE = current_app.config.get('TRYTON_SHIPMENT_OUT_STATE_EXCLUDE', [])
 
 ShipmentOut = tryton.pool.get('stock.shipment.out')
 ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
+DeliveryNote = tryton.pool.get('stock.shipment.out.delivery_note', type='report')
+
+@shipment.route("/print/<int:id>", endpoint="delivery_note")
+@login_required
+@customer_required
+@tryton.transaction()
+def delivery_note(lang, id):
+    '''Delivery Note Print'''
+
+    shipments = ShipmentOut.search([
+        ('id', '=', id),
+        ('customer', '=', session['customer']),
+        ], limit=1)
+    
+    if not shipments:
+        abort(404)
+
+    shipment, = shipments
+
+    _, report, _, _ = DeliveryNote.execute([shipment.id], {})
+    report_name = 'delivery-note-%s.pdf' % (slugify(shipment.code) or 'delivery-note')
+
+    with tempfile.NamedTemporaryFile(
+            prefix='%s-' % current_app.config['TRYTON_DATABASE'],
+            suffix='.pdf', delete=False) as temp:
+        temp.write(report)
+    temp.close()
+    data = open(temp.name, 'rb')
+
+    return send_file(data, attachment_filename=report_name, as_attachment=True)
 
 @shipment.route("/out/", endpoint="shipments-out")
 @login_required
