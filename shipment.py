@@ -25,11 +25,11 @@ DeliveryNote = tryton.pool.get('stock.shipment.out.delivery_note', type='report'
 def delivery_note(lang, id):
     '''Delivery Note Print'''
 
-    shipments = ShipmentOut.search([
-        ('id', '=', id),
-        ('customer', '=', session['customer']),
-        ], limit=1)
-    
+    domain = [('id', '=', id)]
+    if not session.get('manager', False):
+        domain.append(('customer', '=', session['customer']))
+    shipments = ShipmentOut.search(domain, limit=1)
+
     if not shipments:
         abort(404)
 
