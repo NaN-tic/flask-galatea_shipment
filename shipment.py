@@ -36,7 +36,7 @@ def delivery_note(lang, id):
     shipment, = shipments
 
     _, report, _, _ = DeliveryNote.execute([shipment.id], {})
-    report_name = 'delivery-note-%s.pdf' % (slugify(shipment.code) or 'delivery-note')
+    report_name = 'delivery-note-%s.pdf' % (slugify(shipment.number) or 'delivery-note')
 
     with tempfile.NamedTemporaryFile(
             prefix='%s-' % current_app.config['TRYTON_DATABASE'],
