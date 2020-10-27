@@ -121,7 +121,7 @@ def shipment_out_detail(lang, id):
         'name': _('Customer Shipments'),
         }, {
         'slug': url_for('.shipment-out', lang=g.language, id=shipment.id),
-        'name': shipment.number or _('Not reference'),
+        'name': shipment.number or '#%s' % shipment.id,
         }]
 
     return render_template('shipment-out.html',
@@ -203,7 +203,7 @@ def shipment_out_return_detail(lang, id):
         'name': _('Customer Return Shipments'),
         }, {
         'slug': url_for('.shipment-out-return', lang=g.language, id=shipment.id),
-        'name': shipment.number or _('Not reference'),
+        'name': shipment.number or '#%s' % shipment.id,
         }]
 
     return render_template('shipment-out-return.html',
