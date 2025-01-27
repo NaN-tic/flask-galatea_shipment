@@ -45,7 +45,7 @@ def delivery_note(lang, id):
     temp.close()
     data = open(temp.name, 'rb')
 
-    return send_file(data, attachment_filename=report_name, as_attachment=True)
+    return send_file(data, download_name=report_name, as_attachment=True)
 
 @shipment.route("/out/", endpoint="shipments-out")
 @login_required
