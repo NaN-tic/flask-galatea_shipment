@@ -1,7 +1,7 @@
 from trytond.tools import slugify
 from flask import Blueprint, render_template, current_app, abort, g, \
     url_for, request, session, send_file
-from galatea.tryton import tryton
+from app_extensions import tryton
 from galatea.helpers import login_required, customer_required
 from flask_babel import gettext as _, lazy_gettext
 from flask_paginate import Pagination
@@ -11,12 +11,13 @@ shipment = Blueprint('shipment', __name__, template_folder='templates')
 
 DISPLAY_MSG = lazy_gettext('Displaying <b>{start} - {end}</b> of <b>{total}</b>')
 
-LIMIT = current_app.config.get('TRYTON_PAGINATION_SHIPMENT_LIMIT', 20)
-STATE_EXCLUDE = current_app.config.get('TRYTON_SHIPMENT_OUT_STATE_EXCLUDE', [])
+def _limit():
+    return current_app.config.get('TRYTON_PAGINATION_SHIPMENT_LIMIT', 20)
 
-ShipmentOut = tryton.pool.get('stock.shipment.out')
-ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
-DeliveryNote = tryton.pool.get('stock.shipment.out.delivery_note', type='report')
+
+def _state_exclude():
+    return current_app.config.get('TRYTON_SHIPMENT_OUT_STATE_EXCLUDE', [])
+
 
 @shipment.route("/print/<int:id>", endpoint="delivery_note")
 @login_required
@@ -24,6 +25,8 @@ DeliveryNote = tryton.pool.get('stock.shipment.out.delivery_note', type='report'
 @tryton.transaction()
 def delivery_note(lang, id):
     '''Delivery Note Print'''
+    ShipmentOut = tryton.pool.get('stock.shipment.out')
+    DeliveryNote = tryton.pool.get('stock.shipment.out.delivery_note', type='report')
 
     domain = [('id', '=', id)]
     if not session.get('manager', False):
@@ -53,6 +56,8 @@ def delivery_note(lang, id):
 @tryton.transaction()
 def shipment_out_list(lang):
     '''Customer Shipments'''
+    ShipmentOut = tryton.pool.get('stock.shipment.out')
+    limit = _limit()
 
     try:
         page = int(request.args.get('page', 1))
@@ -61,18 +66,18 @@ def shipment_out_list(lang):
 
     domain = [
         ('customer', '=', session['customer']),
-        ('state', 'not in', STATE_EXCLUDE),
+        ('state', 'not in', _state_exclude()),
         ]
     total = ShipmentOut.search_count(domain)
-    offset = (page-1)*LIMIT
+    offset = (page-1)*limit
 
     order = [
         ('id', 'DESC'),
         ]
-    shipments = ShipmentOut.search(domain, offset, LIMIT, order)
+    shipments = ShipmentOut.search(domain, offset, limit, order)
 
     pagination = Pagination(
-        page=page, total=total, per_page=LIMIT, display_msg=DISPLAY_MSG, bs_version='3')
+        page=page, total=total, per_page=limit, display_msg=DISPLAY_MSG, bs_version='3')
 
     #breadcumbs
     breadcrumbs = [{
@@ -98,11 +103,12 @@ def shipment_out_list(lang):
 @tryton.transaction()
 def shipment_out_detail(lang, id):
     '''Customer Shipment Detail'''
+    ShipmentOut = tryton.pool.get('stock.shipment.out')
 
     shipments = ShipmentOut.search([
         ('id', '=', id),
         ('customer', '=', session['customer']),
-        ('state', 'not in', STATE_EXCLUDE),
+        ('state', 'not in', _state_exclude()),
         ], limit=1)
     if not shipments:
         abort(404)
@@ -135,6 +141,8 @@ def shipment_out_detail(lang, id):
 @tryton.transaction()
 def shipment_out_return_list(lang):
     '''Customer Return Shipments'''
+    ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
+    limit = _limit()
 
     try:
         page = int(request.args.get('page', 1))
@@ -143,18 +151,18 @@ def shipment_out_return_list(lang):
 
     domain = [
         ('customer', '=', session['customer']),
-        ('state', 'not in', STATE_EXCLUDE),
+        ('state', 'not in', _state_exclude()),
         ]
     total = ShipmentOutReturn.search_count(domain)
-    offset = (page-1)*LIMIT
+    offset = (page-1)*limit
 
     order = [
         ('id', 'DESC'),
         ]
-    shipments = ShipmentOutReturn.search(domain, offset, LIMIT, order)
+    shipments = ShipmentOutReturn.search(domain, offset, limit, order)
 
     pagination = Pagination(
-        page=page, total=total, per_page=LIMIT, display_msg=DISPLAY_MSG, bs_version='3')
+        page=page, total=total, per_page=limit, display_msg=DISPLAY_MSG, bs_version='3')
 
     #breadcumbs
     breadcrumbs = [{
@@ -180,11 +188,12 @@ def shipment_out_return_list(lang):
 @tryton.transaction()
 def shipment_out_return_detail(lang, id):
     '''Shipment Out Return Detail'''
+    ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
 
     shipments = ShipmentOutReturn.search([
         ('id', '=', id),
         ('customer', '=', session['customer']),
-        ('state', 'not in', STATE_EXCLUDE),
+        ('state', 'not in', _state_exclude()),
         ], limit=1)
     if not shipments:
         abort(404)
@@ -217,14 +226,17 @@ def shipment_out_return_detail(lang, id):
 @tryton.transaction()
 def shipment_list(lang):
     '''Shipments'''
+    ShipmentOut = tryton.pool.get('stock.shipment.out')
+    ShipmentOutReturn = tryton.pool.get('stock.shipment.out.return')
+    limit = _limit()
 
     # Out / Out Return Shipments
     domain = [
         ('customer', '=', session['customer']),
-        ('state', 'not in', STATE_EXCLUDE),
+        ('state', 'not in', _state_exclude()),
         ]
-    out_shipments = ShipmentOut.search(domain, limit=LIMIT)
-    out_return_shipments = ShipmentOutReturn.search(domain, limit=LIMIT)
+    out_shipments = ShipmentOut.search(domain, limit=limit)
+    out_return_shipments = ShipmentOutReturn.search(domain, limit=limit)
 
     #breadcumbs
     breadcrumbs = [{
